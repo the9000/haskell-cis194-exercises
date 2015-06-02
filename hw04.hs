@@ -55,23 +55,10 @@ addChild a (Node d left v right) = Node new_d new_left v new_right
         new_d = (max (depth new_left) (depth new_right)) + 1
   
 
-{- //
-  O(n^2), has depth backwards -}
-recTree :: [a] -> Tree a
-recTree xs = recTree_ 0 xs
-recTree_ :: Integer -> [a] -> Tree a
-recTree_ _ [] = Leaf
-recTree_ d (x:rest) = Node d (recTree_ (d+1) h0) x (recTree_ (d+1) h1)
-  where (h0, h1) = halve rest
+depth :: Tree a -> Integer
+depth Leaf = 0
+depth (Node d _ _ _) = d
 
-
-halve :: [a] -> ([a], [a])
-halve xs = h xs [] []
-  where h [] a0 a1 = (a0, a1)
-        h [x] a0 a1 = (x:a0, a1)
-        h (x:y:rest) a0 a1  = h rest (x:a0) (y:a1)
-
-{- \\ -}
 
 printTree :: Show a => Tree a -> String
 printTree = pt 0 
@@ -81,39 +68,4 @@ pt pad (Node n left v right) = (pt (pad + 1) right) ++
                                (show n) ++ " " ++
                                (show v) ++ "\n" ++
                                (pt (pad + 1) left)
-
-{-
-abcdefghijklmn -> a bc defg hijklmn -> 
-          a
-      b       c
-    d  e    f  g
-  h i j k  l m  n
-
-a
-+-b
-| +-d
-| | +-h
-| | \-i
-| +-e
--}
              
-
-
-depth :: Tree a -> Integer
-depth Leaf = 0
-depth (Node d _ _ _) = d
-
--- insert :: Ord a => a -> Tree a  -> Tree a
--- insert a Leaf = Node Leaf a Leaf
--- insert a (Node left n right) = if a < n
---                                  then Node (insert left a) n right
---                                  else Node  left n (insert right a)
-
--- depth :: Tree a -> Integer
--- depth Leaf = 0
--- depth (Node left _ right) = 1 + (max (depth left) (depth right))
-
--- isBalanced :: Tree a -> Bool
--- isBalanced Leaf = True
--- isBalanced (Node left _ right) = abs ((depth left) - (depth right)) <= 1
-
