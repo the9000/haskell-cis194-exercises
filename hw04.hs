@@ -70,3 +70,8 @@ pt pad (Node n left v right) = (pt (pad + 1) right) ++
                                (show v) ++ "\n" ++
                                (pt (pad + 1) left)
              
+{- xor fold -}
+
+xor :: [Bool] -> Bool
+xor = foldl changer False
+  where changer acc value = if value then not acc else acc
