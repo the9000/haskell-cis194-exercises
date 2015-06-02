@@ -46,17 +46,18 @@ foldTree = foldr addChild Leaf
 
 
 addChild :: a -> Tree a -> Tree a
-addChild a Leaf = Node 1 Leaf a Leaf
+addChild a Leaf = Node 0 Leaf a Leaf
 addChild a (Node d left v right) = Node new_d new_left v new_right
   where left_d = depth left
         right_d = depth right
-        new_left = if left_d <= right_d then addChild a left else left
-        new_right = if left_d > right_d then addChild a right else right
+        (new_left, new_right) = if left_d <= right_d
+                                then (addChild a left, right)
+                                else (left, addChild a right)
         new_d = (max (depth new_left) (depth new_right)) + 1
   
 
 depth :: Tree a -> Integer
-depth Leaf = 0
+depth Leaf = -1
 depth (Node d _ _ _) = d
 
 
