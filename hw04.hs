@@ -75,3 +75,13 @@ pt pad (Node n left v right) = (pt (pad + 1) right) ++
 xor :: [Bool] -> Bool
 xor = foldl changer False
   where changer acc value = if value then not acc else acc
+
+{- map via foldr -}
+
+map' :: (a -> b) -> [a] -> [b]
+map' f = foldr madd []
+  where madd value acc = (f value):acc
+
+{- foldl via foldr -}
+myFoldl :: (a -> b -> a) -> a -> [b] -> a
+myFoldl f base xs = foldr (flip f) base xs
