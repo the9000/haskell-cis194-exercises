@@ -85,3 +85,12 @@ map' f = foldr madd []
 {- foldl via foldr -}
 myFoldl :: (a -> b -> a) -> a -> [b] -> a
 myFoldl f base xs = foldr (flip f) base xs
+
+
+{- producing primes -}
+sieveSundaram :: Integer -> [Integer]
+sieveSundaram n = [2 * k + 1 | k <- [1..n], isGood k]
+
+isGood k = not $ any id [(i + j + 2 * i * j) == k |
+                         j <- [1..(k `div` 2 + 2)], i <- [1..j+1]]
+
