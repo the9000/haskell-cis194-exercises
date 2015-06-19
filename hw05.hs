@@ -90,4 +90,18 @@ instance Expr StackVM.Program where
 compile :: String -> Maybe StackVM.Program
 compile = parseExp lit add mul
 
-{- 6 -}
+
+{- 6: variables -}
+
+newtype VarExprT = VarExprT Integer deriving (Eq, Show)
+
+class HasVars a where
+  var :: String -> a
+
+instance Expr VarExprT where
+  lit n = VarExprT n
+  add (VarExprT a) (VarExprT b) = VarExprT $ (a + b)
+  mul (VarExprT a) (VarExprT b) = VarExprT $ (a * b)
+
+instance HasVars VarExprT where
+  var _ = VarExprT 1 -- no storage, only constants
