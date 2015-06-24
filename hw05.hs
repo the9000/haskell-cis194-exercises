@@ -8,6 +8,8 @@ import qualified StackVM
 
 import Control.Applicative
 
+import qualified Data.Map as M
+
 {- 1 -}
 
 eval :: ExprT.ExprT -> Integer
@@ -105,3 +107,19 @@ instance Expr VarExprT where
 
 instance HasVars VarExprT where
   var _ = VarExprT 1 -- no storage, only constants
+
+
+instance HasVars (M.Map String Integer -> Maybe Integer) where
+  var s = (\m -> M.lookup s m) -- no storage, only constants
+
+withVars :: [(String, Integer)]
+         -> (M.Map String Integer -> Maybe Integer)
+         -> Maybe Integer
+
+withVars vs exp = exp $ M.fromList vs
+
+
+instance Expr (M.Map String Integer -> Maybe Integer) where
+  lit n = \m -> Just n
+  add fa fb = \m -> (+) <$> (fa m) <*> (fb m)
+  mul fa fb = \m -> (*) <$> (fa m) <*> (fb m)
