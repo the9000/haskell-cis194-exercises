@@ -36,3 +36,23 @@ fibs2 = [0, 1] ++ (compute 0 1) where
   compute minus2 minus1 = next:(compute minus1 next) where
     next = minus1 + minus2
 
+-- 3: define Stream
+
+data Stream a = Stream a (Stream a)
+
+streamToList :: Stream a -> [a]
+streamToList (Stream a s) = a : streamToList s
+
+instance Show a => Show (Stream a) where
+  show s = "Stream " ++ (show $ take 20 $ streamToList s)
+  
+-- 4
+
+{- A stream endlessly repeating a constant -}
+streamRepeat c = Stream c (streamRepeat c)
+
+streamMap :: (a -> b) -> Stream a -> Stream b
+streamMap f (Stream a s) = Stream (f a) (streamMap f s)
+
+streamFromSeed :: (a -> a) -> a -> Stream a
+streamFromSeed rule start = Stream start (streamFromSeed rule (rule start))
