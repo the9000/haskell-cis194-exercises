@@ -56,3 +56,39 @@ streamMap f (Stream a s) = Stream (f a) (streamMap f s)
 
 streamFromSeed :: (a -> a) -> a -> Stream a
 streamFromSeed rule start = Stream start (streamFromSeed rule (rule start))
+
+-- 5
+
+nats :: Stream Integer
+nats = streamFromSeed (+1) 0
+
+{- n-th element in the stream (assuming the first element
+corresponds to n is the largest power of 2 which evenly divides n. -}
+rulerDumb :: Stream Integer
+rulerDumb = Stream (findNumber 1 1) (makeRuler 2) where
+  makeRuler :: Integer -> Stream Integer
+  makeRuler n = Stream (findNumber n $ maxPower n) (makeRuler $ n+1)
+  maxPower :: Integer -> Integer
+  maxPower n = truncate $ (log $ fromInteger n) / log 2.0
+  findNumber n p = if n `mod` (2 ^ p) == 0 then p else findNumber n $ p - 1
+
+
+interleaveStreams :: Stream a -> Stream a -> Stream a
+interleaveStreams (Stream a1 rest1) (Stream a2 rest2) =
+  Stream a1 (Stream a2 $ interleaveStreams rest1 rest2)
+
+rulerClever :: Stream Integer  -- using interleaving
+rulerClever = interleaveStreams (streamRepeat 0) (evenStream 1) where
+  evenStream n = undefined -- didn't invent yet
+
+-- 6 infinite polynomes
+
+x :: Stream Integer
+x = Stream 0 $ Stream 1 (streamRepeat 0)
+
+instance Num a => Num (Stream a) where
+  fromInteger n = Stream (fromInteger n) $ streamRepeat 0
+  negate (Stream v rest) = Stream (-v) $ negate rest 
+  (+) (Stream v1 rest1) (Stream v2 rest2) = Stream (v1 + v2) $ (+) rest1 rest2
+  (*) (Stream v1 rest1) s2@(Stream v2 rest2) = Stream (v1 * v2) (smul v1 rest2 + rest1 * s2) where
+    smul scalar (Stream a0 rest) = Stream (scalar * a0) (smul scalar rest)
