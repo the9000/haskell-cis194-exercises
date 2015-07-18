@@ -77,6 +77,15 @@ interleaveStreams :: Stream a -> Stream a -> Stream a
 interleaveStreams (Stream a1 rest1) (Stream a2 rest2) =
   Stream a1 (Stream a2 $ interleaveStreams rest1 rest2)
 
+
+patchStream :: Integer -> Stream a -> Stream a -> Stream a
+patchStream n s_base s_overlay = patch n n s_base s_overlay where
+  patch :: Integer -> Integer -> Stream a -> Stream a -> Stream a
+  patch n 0 base@(Stream b bs) overlay@(Stream o os) = Stream o (patch n n bs os) 
+  patch n count base@(Stream b bs) overlay@(Stream o os) = Stream b (patch n (count-1) bs os) 
+
+
+
 rulerClever :: Stream Integer  -- using interleaving
 rulerClever = interleaveStreams (streamRepeat 0) (evenStream 1) where
   evenStream n = undefined -- didn't invent yet
@@ -90,5 +99,11 @@ instance Num a => Num (Stream a) where
   fromInteger n = Stream (fromInteger n) $ streamRepeat 0
   negate (Stream v rest) = Stream (-v) $ negate rest 
   (+) (Stream v1 rest1) (Stream v2 rest2) = Stream (v1 + v2) $ (+) rest1 rest2
-  (*) (Stream v1 rest1) s2@(Stream v2 rest2) = Stream (v1 * v2) (smul v1 rest2 + rest1 * s2) where
-    smul scalar (Stream a0 rest) = Stream (scalar * a0) (smul scalar rest)
+  (*) (Stream v1 rest1) s2@(Stream v2 rest2) = Stream (v1 * v2) (v1 *- rest2 + rest1 * s2) where
+    scalar *- (Stream a0 rest) = Stream (scalar * a0) (scalar *- rest)
+
+(*-) scalar (Stream a0 rest) = Stream (scalar * a0) (scalar *- rest)
+
+instance Num a => Fractional (Stream a) where
+  (/) (Stream a0 a_rest) (Stream b0 b_rest) = q where
+    q = undefined -- Stream (a0 / b0) (1/b0 *- (a_rest - q * b_rest))
