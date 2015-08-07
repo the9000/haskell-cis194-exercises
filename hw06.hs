@@ -73,52 +73,14 @@ rulerDumb = Stream (findNumber 1 1) (makeRuler 2) where
   findNumber n p = if n `mod` (2 ^ p) == 0 then p else findNumber n $ p - 1
 
 
-interleaveStreams :: Stream a -> Stream a -> Stream a
-interleaveStreams (Stream a1 rest1) (Stream a2 rest2) =
-  Stream a1 (Stream a2 $ interleaveStreams rest1 rest2)
+streamTwist :: Stream a -> Stream a -> Stream a
+streamTwist xs (Stream y ys) = Stream y $ streamTwist ys xs
 
+{- Same as ruleDumb but does not do any math beyond addition. -}
+ruleSmart :: Stream Integer
+ruleSmart = rule 0 where
+  rule n = Stream n (streamTwist (streamRepeat n) (rule (n+1)))
 
-streamMix :: Integer -> Stream Integer
-streamMix n = interleaveStreams (streamRepeat n) (streamMix (n + 1))
-
-
-patchStream :: Integer -> Stream a -> Stream a -> Stream a
-patchStream n s_base s_overlay = patch n n s_base s_overlay where
-  patch :: Integer -> Integer -> Stream a -> Stream a -> Stream a
-  patch n 0 base@(Stream b bs) overlay@(Stream o os) = Stream o (patch n n bs os) 
-  patch n count base@(Stream b bs) overlay@(Stream o os) = Stream b (patch n (count-1) bs os) 
-
-
-patchStream2 :: Integer -> Stream a -> Stream a -> Stream a
-patchStream2 n s_base s_overlay = patch n 0 s_base s_overlay where
-  patch :: Integer -> Integer -> Stream a -> Stream a -> Stream a
-  patch n 0 base@(Stream b bs) overlay@(Stream o os) = Stream o (patch n n bs os) 
-  patch n count base@(Stream b bs) overlay@(Stream o os) = Stream b (patch n (count-1) bs os) 
-
-
-streamPrepend :: Integer -> Stream a -> Stream a -> Stream a
-streamPrepend n s_first s_rest = countdown n s_first s_rest where
-  countdown 0 _ s_rest = s_rest
-  countdown n s_first@(Stream v_first rest_first) s_rest = Stream v_first (
-    countdown (n-1) rest_first s_rest)
-
-
-streamPopN :: Integer -> Stream a -> Stream a -> Stream a
-streamPopN n s_base s_overlay = streamPrepend n s_base (patchStream2 n s_base s_overlay)
-
-streamBinOverlay :: Integer -> Stream Integer -> Stream Integer
-streamBinOverlay n s_base = (streamPrepend pn s_base
-                             (patchStream2 pn s_base (streamBinOverlay (n+1) s_next)))
-  where pn = 2 ^ n -1
-        s_next = patchStream2 pn s_base (streamRepeat (n+1))
-
--- binPatchStream :: Integer -> Stream Integer -> Stream Integer
--- binPatchStream n s = streamTake (2^n - 1) s (binPatchStream )
-
-
-rulerClever :: Stream Integer  -- using interleaving
-rulerClever = interleaveStreams (streamRepeat 0) (evenStream 1) where
-  evenStream n = undefined -- didn't invent yet
 
 -- 6 infinite polynomes
 
@@ -139,12 +101,3 @@ instance Num a => Fractional (Stream a) where
     q = undefined -- Stream (a0 / b0) (1/b0 *- (a_rest - q * b_rest))
 
 
----
-interleave [] _ = []
-interleave _ [] = []
-interleave (x:xs) ys = x:(interleave ys xs)
-
-
-twist [] _ = []
-twist  _ [] = []
-twist xs (y:ys) = y:(twist ys xs)
