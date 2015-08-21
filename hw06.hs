@@ -125,3 +125,6 @@ instance Num Matrix2 where
 instance Show Matrix2 where
   show (Matrix2 a00 a01 a10 a11) = "Matrix 2 (" ++ show a00 ++ ", " ++ show a01 ++ " | " ++ 
                                                    show a10 ++ ", " ++ show a11 ++ ")"
+
+fib4 :: Integer -> Integer
+fib4 n = x where Matrix2 x _ _ _ = (Matrix2 1 1 1 0) ^ n
