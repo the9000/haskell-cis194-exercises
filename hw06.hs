@@ -100,7 +100,7 @@ instance Num a => Fractional (Stream a) where
   (/) (Stream a0 a_rest) (Stream b0 b_rest) = q where
     q = undefined -- Stream (a0 / b0) (1/b0 *- (a_rest - q * b_rest))
     -- have to use the same haed + uncomputed-yet recursive call technique.
-
+    -- Too lazy to actually pursue this now. It's optional anyway,
 
 -- 7: matrices
 
