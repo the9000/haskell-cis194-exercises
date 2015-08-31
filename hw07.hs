@@ -20,3 +20,16 @@ tag Empty = mempty
 tag (Single m _) = m
 tag (Append m _ _) = m
 
+-- #2: indexing
+indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
+indexJ i _ | i < 0 = Nothing
+indexJ i (Append s _ _) | i >= (getSize . size $ s) = Nothing  -- over right bound 
+indexJ i (Single s x) | i == 0 = Just x
+
+-- Here we expect thet Empty can't happen in an Append at all.
+indexJ i (Append _ left right) = if i < left_size then indexJ i left 
+                                 else indexJ (i - left_size) right 
+    where
+      left_size = getSize . size . tag $ left
+indexJ i _ = Nothing
+
