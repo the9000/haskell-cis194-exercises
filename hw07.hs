@@ -44,6 +44,14 @@ jlToList (Append _ l1 l2) = jlToList l1 ++ jlToList l2
 
 -- 2.2
 
+{- 
+NOTE: had to drop the limitation of (Monoif b, Sized b) => JoinList a b
+because doing math with sizes requres them tobe Size, not just Sized.
+Being a Monoid does not help: it gives addition, and we need subtraction.
+Also we receive an integer parameter. We can't even emulate addition (and
+via it subtracion) of b and Int via Peano arithmetic, for Monoid lacks a unity.
+-}
+
 dropJ :: Int -> JoinList Size a -> JoinList Size a
 -- jlToList (dropJ n jl) == drop n (jlToList jl)
 dropJ 0 j = j -- drop nothing
@@ -51,7 +59,7 @@ dropJ _ Empty = Empty
 dropJ _ (Single _ _) = Empty
 
 dropJ n x@(Append s j_left j_right)
-    | n > full_size = Empty
+    | n >= full_size = Empty
     | left_size < n = Append (Size (full_size - n)) (dropJ (n - left_size) j_left) j_right
     | left_size == n = j_right
     | otherwise = dropJ (n - full_size) j_right
@@ -59,6 +67,25 @@ dropJ n x@(Append s j_left j_right)
       left_size = jlSize j_left
       right_size = jlSize j_right
       full_size = jlSize x
+
+
+-- 2.3
+
+takeJ :: Int -> JoinList Size a -> JoinList Size a
+tskeJ _ Empty = Empty
+takeJ 0 _ = Empty
+takeJ 1 x@(Single m a) = x
+takeJ n x@(Append s j_left j_right)
+    | n >= full_size = x
+    | n < left_size = takeJ n j_left
+    | n == left_size = j_left
+    | n >= left_size = (Append new_small_size j_left (takeJ (n - left_size) j_right))
+    where
+      new_small_size = Size (full_size - n)
+      left_size = jlSize j_left
+      right_size = jlSize j_right
+      full_size = jlSize x
+
 
 jlSize :: (Sized b, Monoid b) => JoinList b a -> Int
 jlSize Empty = 0
