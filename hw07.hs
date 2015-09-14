@@ -20,6 +20,9 @@ tag Empty = mempty
 tag (Single m _) = m
 tag (Append m _ _) = m
 
+-- for easy interactive tests:
+mkSingle a = Single (Size 1) a
+
 -- #2: indexing
 
 -- 2.1
@@ -59,14 +62,14 @@ dropJ _ Empty = Empty
 dropJ _ (Single _ _) = Empty
 
 dropJ n x@(Append s j_left j_right)
-    | n >= full_size = Empty
-    | left_size < n = Append (Size (full_size - n)) (dropJ (n - left_size) j_left) j_right
-    | left_size == n = j_right
-    | otherwise = dropJ (n - full_size) j_right
+    | n < 0 = error ("Error: n == " ++ (show n))
+    | n >= jlSize x = Empty
+    | n < left_size = (dropJ n j_left) +++ j_right
+    | n == left_size = j_right
+    | otherwise = dropJ (n - left_size) j_right
     where
       left_size = jlSize j_left
       right_size = jlSize j_right
-      full_size = jlSize x
 
 
 -- 2.3
@@ -79,9 +82,8 @@ takeJ n x@(Append s j_left j_right)
     | n >= full_size = x
     | n < left_size = takeJ n j_left
     | n == left_size = j_left
-    | n >= left_size = (Append new_small_size j_left (takeJ (n - left_size) j_right))
+    | n >= left_size = j_left +++ (takeJ (n - left_size) j_right)
     where
-      new_small_size = Size (full_size - n)
       left_size = jlSize j_left
       right_size = jlSize j_right
       full_size = jlSize x
