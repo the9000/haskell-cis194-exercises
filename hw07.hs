@@ -66,7 +66,7 @@ dropJ n x@(Append s j_left j_right)
 
 -- 2.3
 
-takeJ :: Int -> JoinList Size a -> JoinList Size a
+takeJ :: (Monoid b, Sized b) => Int -> JoinList b a -> JoinList b a
 tskeJ _ Empty = Empty
 takeJ 0 _ = Empty
 takeJ 1 x@(Single m a) = x
