@@ -47,15 +47,7 @@ jlToList (Append _ l1 l2) = jlToList l1 ++ jlToList l2
 
 -- 2.2
 
-{- 
-NOTE: had to drop the limitation of (Monoif b, Sized b) => JoinList a b
-because doing math with sizes requres them tobe Size, not just Sized.
-Being a Monoid does not help: it gives addition, and we need subtraction.
-Also we receive an integer parameter. We can't even emulate addition (and
-via it subtracion) of b and Int via Peano arithmetic, for Monoid lacks a unity.
--}
-
-dropJ :: Int -> JoinList Size a -> JoinList Size a
+dropJ :: (Monoid b, Sized b) => Int -> JoinList b a -> JoinList b a
 -- jlToList (dropJ n jl) == drop n (jlToList jl)
 dropJ 0 j = j -- drop nothing
 dropJ _ Empty = Empty
@@ -92,3 +84,26 @@ takeJ n x@(Append s j_left j_right)
 jlSize :: (Sized b, Monoid b) => JoinList b a -> Int
 jlSize Empty = 0
 jlSize x = getSize . size . tag $ x
+
+
+-- Poor man's unit testing 'framework' (to avoid setting up HUnit)
+
+assert :: Bool -> Maybe String
+assert True = Nothing
+assert _ = Just "Failed"
+
+assertEquals :: (Eq a, Show a) => a -> a -> Maybe String
+assertEquals x y 
+    | x == y = Nothing
+    | otherwise = Just ("Expected " ++ (show x) ++ ", got " ++ (show y))
+
+
+-- Sort of tests
+
+a1 = mkSingle 'a'
+a2 = a1 +++ mkSingle 'b'
+a3_l = mkSingle '@' +++ a2
+a3_r = a2 +++ mkSingle 'c'
+
+testSuite = undefined
+
