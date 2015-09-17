@@ -1,4 +1,4 @@
-{- -}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 import Data.Monoid
 import Sized
@@ -32,11 +32,11 @@ indexJ i _ | i < 0 = Nothing
 indexJ i (Append s _ _) | i >= (getSize . size $ s) = Nothing  -- over right bound
 indexJ i (Single s x) | i == 0 = Just x
 
--- Here we expect thet Empty can't happen in an Append at all.
+-- Here we expect that Empty can't happen in an Append at all.
 indexJ i (Append _ left right) = if i < left_size then indexJ i left
                                  else indexJ (i - left_size) right
     where
-      left_size = getSize . size . tag $ left
+      left_size = jlSize left
 indexJ i _ = Nothing
 
 -- from task text, just to simplify testing
@@ -84,6 +84,25 @@ takeJ n x@(Append s j_left j_right)
 jlSize :: (Sized b, Monoid b) => JoinList b a -> Int
 jlSize Empty = 0
 jlSize x = getSize . size . tag $ x
+
+
+-- 3: scrabble score
+
+newtype Score = Score Int
+    deriving (Eq, Ord, Show, Num)
+
+-- TODO: use a faster lookup, e.g. via an array or a treemap
+score :: Char -> Score
+score 'a' = Score 1
+score 'x' = Score 10
+score _ = 0
+
+instance Monoid Score where
+    mempty = Score 0
+    mappend = (+)
+
+scoreString :: String -> Score
+scoreString = foldr mappend mempty . map score  
 
 
 -- Poor man's unit testing 'framework' (to avoid setting up HUnit)
