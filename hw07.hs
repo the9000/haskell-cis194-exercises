@@ -1,7 +1,11 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, FlexibleInstances, TypeSynonymInstances #-}
 
 import Data.Monoid
+import Data.List (intersperse)
+import Control.Monad (join)
+
 import Sized
+import Buffer
 
 -- Join List from assignment
 data JoinList m a = Empty
@@ -91,6 +95,9 @@ jlSize x = getSize . size . tag $ x
 newtype Score = Score Int
     deriving (Eq, Ord, Show, Num)
 
+intScore :: Score -> Int
+intScore (Score n) = n
+
 -- TODO: use a faster lookup, e.g. via an array or a treemap
 score :: Char -> Score
 score 'a' = Score 1
@@ -103,6 +110,10 @@ instance Monoid Score where
 
 scoreString :: String -> Score
 scoreString = foldr mappend mempty . map score  
+
+
+scoreLine :: String -> JoinList Score String
+scoreLine s = Single (scoreString s) s
 
 
 -- Poor man's unit testing 'framework' (to avoid setting up HUnit)
@@ -125,4 +136,15 @@ a3_l = mkSingle '@' +++ a2
 a3_r = a2 +++ mkSingle 'c'
 
 testSuite = undefined
+
+-- we ignore the fact that a balanced tree would work better, and load a linear list of lines.
+
+instance Buffer (JoinList (Score, Size) String) where
+  toString     = join . intersperse "\n". jlToList
+  fromString   = foldr (+++) Empty . map makeSingle . lines 
+    where makeSingle s = Single (scoreString s, Size 1) s
+  line         = indexJ
+  replaceLine n new_line buf = undefined -- replaceJ n new_line b
+  numLines     = jlSize
+  value        = intScore . fst . tag
 
