@@ -6,6 +6,7 @@ import Control.Monad (join)
 
 import Sized
 import Buffer
+import Editor
 
 -- Join List from assignment
 data JoinList m a = Empty
@@ -144,7 +145,7 @@ instance Buffer (JoinList (Score, Size) String) where
   fromString   = foldr (+++) Empty . map makeSingle . lines 
     where makeSingle s = Single (scoreString s, Size 1) s
   line         = indexJ
-  replaceLine n new_line buf = undefined -- replaceJ n new_line b
+  replaceLine  = replaceJ
   numLines     = jlSize
   value        = intScore . fst . tag
 
@@ -155,3 +156,7 @@ replaceJ n new_line (Append _ left right)
     | n < left_size = (replaceJ n new_line left) +++ right
     | otherwise = left +++ (replaceJ (n - left_size) new_line right)
     where left_size = jlSize left
+
+
+-- check that the editor works
+main = runEditor editor (Empty :: JoinList (Score, Size) String)
