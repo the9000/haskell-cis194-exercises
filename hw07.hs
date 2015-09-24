@@ -116,27 +116,7 @@ scoreString = foldr mappend mempty . map score
 scoreLine :: String -> JoinList Score String
 scoreLine s = Single (scoreString s) s
 
-
--- Poor man's unit testing 'framework' (to avoid setting up HUnit)
-
-assert :: Bool -> Maybe String
-assert True = Nothing
-assert _ = Just "Failed"
-
-assertEquals :: (Eq a, Show a) => a -> a -> Maybe String
-assertEquals x y 
-    | x == y = Nothing
-    | otherwise = Just ("Expected " ++ (show x) ++ ", got " ++ (show y))
-
-
--- Sort of tests
-
-a1 = mkSingle 'a'
-a2 = a1 +++ mkSingle 'b'
-a3_l = mkSingle '@' +++ a2
-a3_r = a2 +++ mkSingle 'c'
-
-testSuite = undefined
+-- TODO: add tests.
 
 -- we ignore the fact that a balanced tree would work better, and load a linear list of lines.
 
