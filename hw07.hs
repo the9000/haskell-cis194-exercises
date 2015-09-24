@@ -148,3 +148,10 @@ instance Buffer (JoinList (Score, Size) String) where
   numLines     = jlSize
   value        = intScore . fst . tag
 
+replaceJ :: Int -> String -> (JoinList (Score, Size) String) -> (JoinList (Score, Size) String)
+replaceJ n _ buf | n < 0 || n >= (jlSize buf) = error ("Wrong index" ++ (show n))
+replaceJ 0 new_line (Single _ _) = fromString new_line
+replaceJ n new_line (Append _ left right)
+    | n < left_size = (replaceJ n new_line left) +++ right
+    | otherwise = left +++ (replaceJ (n - left_size) new_line right)
+    where left_size = jlSize left
