@@ -49,5 +49,5 @@ onLevel (Node boss subs) = (bpl_with_boss, bpl_without_boss) where
 
 
 maxFun :: Tree Employee -> GuestList
-maxFun = uncurry max $ onLevel
+maxFun = uncurry max . onLevel
 
