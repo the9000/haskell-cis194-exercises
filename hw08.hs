@@ -2,7 +2,7 @@
 
 import Data.Monoid
 import Data.Tree
-import Data.List (foldl', maximumBy)
+import Data.List (foldl', intersperse)
 import Control.Monad (join)
 
 import System.IO
@@ -58,9 +58,21 @@ maxFun = uncurry max . onLevel
 
 -- 5: IO
 
+-- a REPL helper.
+formatTree :: Show a => Tree a -> [String]
+formatTree t = fmt 0 [] t
+    where
+      fmt :: Show a => Int -> [String] -> Tree a -> [String]
+      fmt pad prev (Node {rootLabel=root, subForest=subs}) = 
+          prev ++ [(padding pad) ++ (show root)] ++ join (map (fmt (pad + 1) []) subs)
+      padding 0 = ""
+      padding n = ' ':(padding (n-1))
+                                         
+
 main :: IO ()
 main = do
   handle <- openFile "company.txt" ReadMode
   contents <- hGetContents handle
   let tree = read contents :: Tree Employee
-  putStrLn ("Top is " ++ (show $ maxFun tree))
+  let top_tree = maxFun tree 
+  putStrLn "Top"
