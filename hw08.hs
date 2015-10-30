@@ -2,7 +2,7 @@
 
 import Data.Monoid
 import Data.Tree
-import Data.List (foldl', intersperse)
+import Data.List (foldl', sortBy)
 import Control.Monad (join)
 
 import System.IO
@@ -69,10 +69,16 @@ formatTree t = fmt 0 [] t
       padding n = ' ':(padding (n-1))
                                          
 
+printList :: GuestList -> (String, [String])
+printList (GL people score) = (
+    (show score), 
+    (map empName $ sortBy (\p1 p2 -> compare (empName p1) (empName p2)) people))
+
 main :: IO ()
 main = do
   handle <- openFile "company.txt" ReadMode
   contents <- hGetContents handle
   let tree = read contents :: Tree Employee
-  let top_tree = maxFun tree 
-  putStrLn "Top"
+  let (max_score, max_list) = printList $ maxFun tree 
+  putStrLn ("Total fun: " ++ max_score)
+  sequence_ $ map putStrLn max_list
