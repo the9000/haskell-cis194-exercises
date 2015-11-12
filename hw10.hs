@@ -28,3 +28,15 @@ instance Applicative Parser where
 
 abParser :: Parser (Char, Char)
 abParser = (,) <$> (char 'a') <*> (char 'b')
+
+abParser_ :: Parser ()
+abParser_ = (\x y -> ()) <$> (char 'a') <*> (char 'b')
+
+intPair :: Parser [Integer]
+intPair = (\n1 _ n2 -> [n1, n2]) <$> posInt <*> (char ' ') <*> posInt
+
+-- 4: 
+
+class Applicative f => Alternative f where
+    empty :: f a
+    (<|>) :: f a -> f a -> f a
