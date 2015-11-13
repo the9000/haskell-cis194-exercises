@@ -1,4 +1,5 @@
 import Control.Applicative
+import Data.Char
 
 import AParser
 
@@ -37,6 +38,14 @@ intPair = (\n1 _ n2 -> [n1, n2]) <$> posInt <*> (char ' ') <*> posInt
 
 -- 4: 
 
-class Applicative f => Alternative f where
-    empty :: f a
-    (<|>) :: f a -> f a -> f a
+instance Control.Applicative.Alternative Parser where
+    empty = Parser { runParser = const Nothing }
+    (<|>) pa pb = Parser { runParser = \input -> (runParser pa input) <|> (runParser pb input) }
+
+-- 5:
+
+upperCharStr = show <$> (satisfy isUpper)
+intStr = show <$> posInt
+
+intOrUppercase :: Parser ()
+intOrUppercase = const () <$> (upperCharStr <|> intStr)
