@@ -12,4 +12,8 @@ zeroOrMore pa = Parser { runParser = run }
       run input = loop (runParser pa input) input []
 
 oneOrMore  :: Parser a -> Parser [a]
-oneOrMore = undefined
+oneOrMore pa = Parser { runParser = run }
+    where
+      run input =  do (a1, rest1) <- runParser pa input;
+                      (a2, rest2) <- runParser (zeroOrMore pa) rest1;
+                      return (a1:a2, rest2)
