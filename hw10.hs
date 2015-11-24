@@ -1,3 +1,5 @@
+module Hw10 where
+
 import Control.Applicative
 import Data.Char
 
