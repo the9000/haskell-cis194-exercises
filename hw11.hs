@@ -55,10 +55,11 @@ data SExpr = A Atom | Comb [SExpr]
 atomP :: Parser Atom
 atomP = (posInt @> N) <|> (ident @> I)
 
-sexprP :: Parser SExpr
-sexprP = parser where
+parseSExpr :: Parser SExpr
+parseSExpr = parser where
     optSpace = zeroOrMore (satisfy isSpace)
     lparenP = satisfy (== '(')
     rparenP = satisfy (== ')')
-    parenthesizedP = optSpace *> lparenP *> (zeroOrMore (optSpace *> sexprP)) <* optSpace <* rparenP 
+    parenthesizedP = optSpace *> lparenP *> 
+                     (zeroOrMore (optSpace *> parseSExpr)) <* optSpace <* rparenP 
     parser = atomP @> A <|> (parenthesizedP @> Comb)
