@@ -53,17 +53,12 @@ data SExpr = A Atom | Comb [SExpr]
     run input = (runParser pa input) >>= \t -> Just  $ first wrapper t
 
 atomP :: Parser Atom
-atomP = Parser { runParser = run } where
-    run input = ((runParser posInt input) >>= \(int, rest) -> Just ((N int), rest)) <|>
-                ((runParser ident input) >>= \(identifier, rest) -> Just ((I identifier), rest))
+atomP = (posInt @> N) <|> (ident @> I)
 
-{-
 sexprP :: Parser SExpr
 sexprP = parser where
     optSpace = zeroOrMore (satisfy isSpace)
     lparenP = satisfy (== '(')
     rparenP = satisfy (== ')')
-    parenthesizedP = optSpace *> lparenP *> optSpace *> sexprP <* optSpace <* rparenP 
-    atomSP = Parser { runParser = \input -> (runParser atomP input) >= \(atom, rest) -> Just (A atom, rest)}
-    parser = atomSP <|> parenthesizedP
--}
+    parenthesizedP = optSpace *> lparenP *> (zeroOrMore (optSpace *>sexprP)) <* optSpace <* rparenP 
+    parser = atomP @> A <|> (parenthesizedP @> Comb)
