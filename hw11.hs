@@ -35,7 +35,7 @@ ident :: Parser String
 ident = Parser { runParser = run }
     where
       run input = do (initial, rest1) <- runParser (satisfy isAlpha) input
-                     (body, rest2) <- runParser (oneOrMore $ satisfy isAlphaNum) rest1
+                     (body, rest2) <- runParser (zeroOrMore $ satisfy isAlphaNum) rest1
                      return (initial:body, rest2)
 
 -- 3: parsing sexps
@@ -60,5 +60,5 @@ sexprP = parser where
     optSpace = zeroOrMore (satisfy isSpace)
     lparenP = satisfy (== '(')
     rparenP = satisfy (== ')')
-    parenthesizedP = optSpace *> lparenP *> (zeroOrMore (optSpace *>sexprP)) <* optSpace <* rparenP 
+    parenthesizedP = optSpace *> lparenP *> (zeroOrMore (optSpace *> sexprP)) <* optSpace <* rparenP 
     parser = atomP @> A <|> (parenthesizedP @> Comb)
